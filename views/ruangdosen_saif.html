@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Aktivitas Ruang Dosen - Saif</title>
+  <style>
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+    }
+    .popup {
+      background: #fff;
+      padding: 20px;
+      max-width: 300px;
+      margin: 100px auto;
+      border: 1px solid #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Aktivitas Ruang Dosen - SAIF</h1>
+
+  <table border="1" id="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nama Dosen</th>
+        <th>Datetime</th>
+        <th>Status</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <button onclick="openAdd()">+ Tambah Data</button>
+
+  <!-- Popup Tambah -->
+  <div id="add-popup" class="overlay">
+    <div class="popup">
+      <h3>Tambah Data</h3>
+      <form id="add-form">
+        <select name="status" required>
+          <option value="Ada">Ada</option>
+          <option value="Tidak Ada">Tidak Ada</option>
+        </select>
+        <br><br>
+        <button type="submit">Simpan</button>
+        <button type="button" onclick="closeAdd()">Batal</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Popup Edit -->
+  <div id="edit-popup" class="overlay">
+    <div class="popup">
+      <h3>Edit Status</h3>
+      <form id="edit-form">
+        <select name="status" required>
+          <option value="Ada">Ada</option>
+          <option value="Tidak Ada">Tidak Ada</option>
+        </select>
+        <input type="hidden" name="id">
+        <br><br>
+        <button type="submit">Simpan</button>
+        <button type="button" onclick="closeEdit()">Batal</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function loadData() {
+      fetch('/api/aktivitas_dosen')
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.querySelector('#data-table tbody');
+          tbody.innerHTML = '';
+          data.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${row.id}</td>
+              <td>${row.nama_dosen}</td>
+              <td>${row.datetime}</td>
+              <td>${row.status}</td>
+              <td>
+                <button onclick="openEdit(${row.id}, '${row.status}')">Edit</button>
+                <button onclick="deleteRow(${row.id})">Hapus</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        });
+    }
+
+    function openAdd() {
+      document.getElementById('add-popup').style.display = 'block';
+    }
+
+    function closeAdd() {
+      document.getElementById('add-popup').style.display = 'none';
+    }
+
+    document.getElementById('add-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const status = this.status.value;
+
+      fetch('/api/aktivitas_dosen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      }).then(() => {
+        this.reset();
+        closeAdd();
+        loadData();
+      });
+    });
+
+    function openEdit(id, currentStatus) {
+      const overlay = document.getElementById('edit-popup');
+      overlay.style.display = 'block';
+      const select = document.querySelector('#edit-form select[name="status"]');
+      const hiddenId = document.querySelector('#edit-form input[name="id"]');
+
+      select.value = currentStatus;
+      hiddenId.value = id;
+    }
+
+    function closeEdit() {
+      document.getElementById('edit-popup').style.display = 'none';
+    }
+
+    document.getElementById('edit-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const status = this.status.value;
+      const id = this.id.value;
+
+      fetch('/api/aktivitas_dosen/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      }).then(() => {
+        closeEdit();
+        loadData();
+      });
+    });
+
+    function deleteRow(id) {
+      if (confirm('Hapus data ini?')) {
+        fetch('/api/aktivitas_dosen/' + id, { method: 'DELETE' })
+          .then(() => loadData());
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard Dosen</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column; /* Header di atas, konten di bawah */
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      color: #333;
+    }
+
+    header {
+      width: 100%;
+      height: 60px;
+      background: #2d3748;
+      color: #fff;
+      line-height: 60px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    header .logo {
+      float: left;
+      margin-left: 30px;
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    header .logout-btn {
+      float: right;
+      margin-right: 30px;
+      color: #fff;
+      text-decoration: none;
+      background: #e53e3e;
+      padding: 8px 16px;
+      border-radius: 4px;
+      line-height: normal;
+      margin-top: 12px; /* agar vertikal rapi */
+    }
+
+    header .logout-btn:hover {
+      background: #c53030;
+    }
+
+    .body-content {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    nav {
+      width: 220px;
+      background: #e2e8f0;
+      padding: 20px;
+      box-sizing: border-box;
+      border-right: 2px solid #cbd5e0;
+      overflow-y: auto;
+    }
+
+    nav h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #2d3748;
+    }
+
+    nav button {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px 15px;
+      text-align: left;
+      background: #edf2f7;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    nav button:hover {
+      background: #cbd5e0;
+    }
+
+    main {
+      flex: 1;
+      padding: 30px;
+      box-sizing: border-box;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #fff;
+    }
+
+    table th, table td {
+      border: 1px solid #cbd5e0;
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    table th {
+      background: #e2e8f0;
+    }
+
+    h3 {
+      margin-top: 0;
+      color: #2d3748;
+    }
+
+    select,
+    input[type="text"],
+    input[type="time"],
+    input[type="password"],
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin: 4px 0 10px;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .popup {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .popup-inner {
+      background: #fff;
+      padding: 30px;
+      border-radius: 6px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .popup-inner h3 {
+      margin-top: 0;
+    }
+
+    .popup-inner button {
+      margin-right: 10px;
+    }
+
+  </style>
+
+</head>
+<body>
+    <header>
+  <div class="logo">MyLab</div>
+  <a href="/logout" class="logout-btn">Logout</a>
+</header>
+<div class="body-content">
+      <nav>
+    <button onclick="loadContent(1)">List Semua Dosen Di Ruangan Anda</button>
+    <button onclick="loadContent(2)">Aktivitas Anda</button>
+  </nav>
+
+  <main>
+    <h1>Dashboard Dosen</h1>
+    <div id="content">
+      <p>Pilih sidebar untuk load data.</p>
+    </div>
+  </main>
+
+  <!-- POPUP TAMBAH -->
+  <div id="add-popup" class="overlay">
+    <div class="popup">
+      <h3>Tambah Aktivitas</h3>
+      <form id="add-form">
+        <label>Status:</label><br>
+        <select name="status" required>
+          <option value="Ada">Ada</option>
+          <option value="Tidak Ada">Tidak Ada</option>
+        </select><br><br>
+        <button type="submit">Simpan</button>
+        <button type="button" onclick="closeAdd()">Batal</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- POPUP EDIT -->
+  <div id="edit-popup" class="overlay">
+    <div class="popup">
+      <h3>Edit Aktivitas</h3>
+      <form id="edit-form">
+        <label>Status:</label><br>
+        <select name="status" required>
+          <option value="Ada">Ada</option>
+          <option value="Tidak Ada">Tidak Ada</option>
+        </select><br><br>
+        <input type="hidden" name="id">
+        <button type="submit">Simpan</button>
+        <button type="button" onclick="closeEdit()">Batal</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+  <script>
+    function loadContent(number) {
+      const content = document.getElementById('content');
+
+      if (number === 2) {
+        const filterDate = document.getElementById('filterTanggal')?.value || '';
+
+        fetch(`/api/sidebardosen2${filterDate ? '?tanggal=' + filterDate : ''}`)
+          .then(res => res.json())
+          .then(data => {
+            let html = `
+              <button onclick="openAdd()">+ Tambah Aktivitas</button>
+              <h3>Filter Tanggal:</h3>
+              <input type="date" id="filterTanggal" value="${filterDate}">
+              <button onclick="loadContent(2)">Filter</button>
+
+              <h3>Daftar Aktivitas:</h3>
+              <table>
+                <tr><th>ID</th><th>Datetime</th><th>Status</th><th>Aksi</th></tr>
+            `;
+
+            data.forEach(row => {
+              html += `
+                <tr>
+                  <td>${row.id}</td>
+                  <td>${row.datetime}</td>
+                  <td>${row.status}</td>
+                  <td>
+                    <button onclick="openEdit(${row.id}, '${row.status}')">Edit</button>
+                    <button onclick="deleteAktivitas(${row.id})">Hapus</button>
+                  </td>
+                </tr>
+              `;
+            });
+
+            html += '</table>';
+            content.innerHTML = html;
+          });
+
+      } else if (number === 1) {
+        const filterDate1 = document.getElementById('filterTanggal1')?.value || '';
+
+        fetch(`/api/sidebardosen1${filterDate1 ? '?tanggal=' + filterDate1 : ''}`)
+            .then(res => res.json())
+            .then(data => {
+            let html = `
+                <h3>Filter Tanggal:</h3>
+                <input type="date" id="filterTanggal1" value="${filterDate1}">
+                <button onclick="loadContent(1)">Filter</button>
+
+                <h3>List Semua Dosen</h3>
+                <table>
+                <tr><th>ID</th><th>Nama</th><th>Datetime</th><th>Status</th></tr>
+            `;
+
+            data.forEach(row => {
+                html += `<tr><td>${row.id}</td><td>${row.nama_dosen}</td><td>${row.datetime}</td><td>${row.status}</td></tr>`;
+            });
+
+            html += '</table>';
+            content.innerHTML = html;
+            });
+        }
+
+    }
+
+    // ===== POPUP TAMBAH =====
+    function openAdd() {
+      document.getElementById('add-popup').style.display = 'block';
+    }
+    function closeAdd() {
+      document.getElementById('add-popup').style.display = 'none';
+    }
+    document.getElementById('add-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const status = this.status.value;
+
+      fetch('/api/sidebardosen2/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ status })
+      }).then(res => res.json()).then(() => {
+        this.reset();
+        closeAdd();
+        loadContent(2);
+      });
+    });
+
+    // ===== POPUP EDIT =====
+    function openEdit(id, status) {
+      document.getElementById('edit-popup').style.display = 'block';
+      const form = document.getElementById('edit-form');
+      form.status.value = status;
+      form.id.value = id;
+    }
+    function closeEdit() {
+      document.getElementById('edit-popup').style.display = 'none';
+    }
+    document.getElementById('edit-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const id = this.id.value;
+      const status = this.status.value;
+
+      fetch('/api/sidebardosen2/update', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id, status })
+      }).then(res => res.json()).then(() => {
+        closeEdit();
+        loadContent(2);
+      });
+    });
+
+    // ===== HAPUS =====
+    function deleteAktivitas(id) {
+      if (!confirm('Yakin hapus?')) return;
+      fetch('/api/sidebardosen2/delete', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id })
+      }).then(res => res.json()).then(() => {
+        loadContent(2);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Aktivitas Ruang Lab</title>
+</head>
+<body>
+  <h1>Aktivitas Ruang Lab</h1>
+
+  <!-- Tombol Filter -->
+  <button onclick="setLaboran('Saif')">Saif</button>
+  <button onclick="setLaboran('Banu Failasuf, S.Tr')">Banu</button>
+  <button onclick="setLaboran('Agus Riady, A.Md.Kom')">Agus</button>
+  <button onclick="setLaboran('Supardianto, S.ST.M.Eng.')">Supardianto</button>
+  <button onclick="setLaboran('Sartikha, S. ST., M.Eng')">Sartikha</button>
+  <button onclick="setLaboran('Rudi')">Rudi</button>
+  <button onclick="clearLaboran()">Tampilkan Semua</button>
+
+  <h2 id="current-laboran">Semua Laboran</h2>
+
+  <table border="1" id="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nama Laboran</th>
+        <th>Datetime</th>
+        <th>Status</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Tambah Data</h2>
+  <form id="add-form">
+    <div id="select-laboran-wrapper">
+      <select name="nama_laboran">
+        <option value="Saif">Saif</option>
+        <option value="Banu Failasuf, S.Tr">Banu Failasuf, S.Tr</option>
+        <option value="Agus Riady, A.Md.Kom">Agus Riady, A.Md.Kom</option>
+        <option value="Supardianto, S.ST.M.Eng.">Supardianto, S.ST.M.Eng.</option>
+        <option value="Sartikha, S. ST., M.Eng">Sartikha, S. ST., M.Eng</option>
+        <option value="Rudi">Rudi</option>
+      </select>
+    </div>
+    <input type="hidden" name="nama_laboran_hidden">
+    <input type="text" name="status" placeholder="Status" required>
+    <button type="submit">Tambah</button>
+  </form>
+
+  <script>
+    let selectedLaboran = '';
+
+    function loadData() {
+      let url = '/api/aktivitas';
+      if (selectedLaboran) {
+        url += '?nama=' + encodeURIComponent(selectedLaboran);
+      }
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.querySelector('#data-table tbody');
+          tbody.innerHTML = '';
+          data.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${row.id}</td>
+              <td>${row.nama_laboran}</td>
+              <td>${row.datetime}</td>
+              <td>${row.status}</td>
+              <td>
+                <button onclick="editRow(${row.id}, '${row.status}')">Edit</button>
+                <button onclick="deleteRow(${row.id})">Hapus</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        });
+    }
+
+    function setLaboran(nama) {
+      selectedLaboran = nama;
+      document.getElementById('current-laboran').innerText = 'Laboran: ' + nama;
+      document.getElementById('select-laboran-wrapper').style.display = 'none';
+      document.querySelector('[name="nama_laboran_hidden"]').value = nama;
+      loadData();
+    }
+
+    function clearLaboran() {
+      selectedLaboran = '';
+      document.getElementById('current-laboran').innerText = 'Semua Laboran';
+      document.getElementById('select-laboran-wrapper').style.display = 'block';
+      document.querySelector('[name="nama_laboran_hidden"]').value = '';
+      loadData();
+    }
+
+    document.getElementById('add-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      let nama_laboran = selectedLaboran || document.querySelector('select[name="nama_laboran"]').value;
+      const status = this.status.value;
+      fetch('/api/aktivitas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nama_laboran, status })
+      })
+      .then(() => {
+        this.reset();
+        loadData();
+      });
+    });
+
+    function editRow(id, oldStatus) {
+      const newStatus = prompt('Status baru:', oldStatus);
+      if (newStatus && newStatus !== oldStatus) {
+        fetch('/api/aktivitas/' + id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        }).then(() => loadData());
+      }
+    }
+
+    function deleteRow(id) {
+      if (confirm('Hapus data ini?')) {
+        fetch('/api/aktivitas/' + id, { method: 'DELETE' })
+          .then(() => loadData());
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

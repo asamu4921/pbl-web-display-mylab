@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Aktivitas Ruang Dosen</title>
+</head>
+<body>
+  <h1>Aktivitas Ruang Dosen</h1>
+
+  <!-- Tombol pilih grup -->
+  <button onclick="setGrup('ruangdosen1')">Ruang Dosen 1</button>
+  <button onclick="setGrup('ruangdosen2')">Ruang Dosen 2</button>
+  <button onclick="setGrup('ruangdosen3')">Ruang Dosen 3</button>
+
+  <h2 id="current-grup">Belum Pilih Grup</h2>
+
+  <table border="1" id="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nama Dosen</th>
+        <th>Datetime</th>
+        <th>Status</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Tambah Data</h2>
+  <form id="add-form" style="display:none;">
+    <select name="nama_dosen" required id="select-dosen"></select>
+    <select name="status" required>
+      <option value="Ada">Ada</option>
+      <option value="Tidak Ada">Tidak Ada</option>
+    </select>
+    <button type="submit">Tambah</button>
+  </form>
+
+  <script>
+    let currentGrup = '';
+    const grupDosen = {
+      ruangdosen1: ['wali', 'ridho', 'saif'],
+      ruangdosen2: ['grecia', 'kavit', 'nuryanti'],
+      ruangdosen3: ['naurah', 'jokowi', 'mpleh']
+    };
+
+    function setGrup(grup) {
+      currentGrup = grup;
+      document.getElementById('current-grup').innerText = grup;
+      document.getElementById('add-form').style.display = 'block';
+
+      // Isi select dosen
+      const select = document.getElementById('select-dosen');
+      select.innerHTML = '';
+      grupDosen[grup].forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.innerText = d;
+        select.appendChild(opt);
+      });
+
+      loadData();
+    }
+
+    function loadData() {
+      fetch('/api/aktivitas_dosen?grup=' + currentGrup)
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.querySelector('#data-table tbody');
+          tbody.innerHTML = '';
+          data.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${row.id}</td>
+              <td>${row.nama_dosen}</td>
+              <td>${row.datetime}</td>
+              <td>${row.status}</td>
+              <td>
+                <button onclick="editRow(${row.id}, '${row.status}')">Edit</button>
+                <button onclick="deleteRow(${row.id})">Hapus</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        });
+    }
+
+    document.getElementById('add-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const nama_dosen = this.nama_dosen.value;
+      const status = this.status.value;
+
+      fetch('/api/aktivitas_dosen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nama_dosen, status })
+      })
+      .then(() => {
+        this.reset();
+        loadData();
+      });
+    });
+
+    function editRow(id, oldStatus) {
+      const newStatus = prompt('Status baru (Ada/Tidak Ada):', oldStatus);
+      if (newStatus && newStatus !== oldStatus) {
+        fetch('/api/aktivitas_dosen/' + id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        }).then(() => loadData());
+      }
+    }
+
+    function deleteRow(id) {
+      if (confirm('Yakin hapus?')) {
+        fetch('/api/aktivitas_dosen/' + id, { method: 'DELETE' })
+          .then(() => loadData());
+      }
+    }
+  </script>
+</body>
+</html>
+

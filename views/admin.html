@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard Admin</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column; /* Header di atas, konten di bawah */
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      color: #333;
+    }
+
+    header {
+      width: 100%;
+      height: 60px;
+      background: #2d3748;
+      color: #fff;
+      line-height: 60px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    header .logo {
+      float: left;
+      margin-left: 30px;
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    header .logout-btn {
+      float: right;
+      margin-right: 30px;
+      color: #fff;
+      text-decoration: none;
+      background: #e53e3e;
+      padding: 8px 16px;
+      border-radius: 4px;
+      line-height: normal;
+      margin-top: 12px; /* agar vertikal rapi */
+    }
+
+    header .logout-btn:hover {
+      background: #c53030;
+    }
+
+    .body-content {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    nav {
+      width: 220px;
+      background: #e2e8f0;
+      padding: 20px;
+      box-sizing: border-box;
+      border-right: 2px solid #cbd5e0;
+      overflow-y: auto;
+    }
+
+    nav h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #2d3748;
+    }
+
+    nav button {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px 15px;
+      text-align: left;
+      background: #edf2f7;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    nav button:hover {
+      background: #cbd5e0;
+    }
+
+    main {
+      flex: 1;
+      padding: 30px;
+      box-sizing: border-box;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #fff;
+    }
+
+    table th, table td {
+      border: 1px solid #cbd5e0;
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    table th {
+      background: #e2e8f0;
+    }
+
+    h3 {
+      margin-top: 0;
+      color: #2d3748;
+    }
+
+    select,
+    input[type="text"],
+    input[type="time"],
+    input[type="password"],
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin: 4px 0 10px;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .popup {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .popup-inner {
+      background: #fff;
+      padding: 30px;
+      border-radius: 6px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .popup-inner h3 {
+      margin-top: 0;
+    }
+
+    .popup-inner button {
+      margin-right: 10px;
+    }
+
+  </style>
+
+</head>
+<body>
+<header>
+  <div class="logo">MyLab</div>
+  <a href="/logout" class="logout-btn">Logout</a>
+</header>
+<div class="body-content">
+  <nav>
+    <button onclick="loadContent(1)">API</button>
+    <button onclick="loadContent(2)">JADWAL MATAKULIAH</button>
+    <button onclick="loadContent(3)">RUANG DOSEN</button>
+    <button onclick="loadContent(4)">RUANG LAB</button>
+    <button onclick="loadContent(5)">USERS</button>
+    <button onclick="loadContent(6)">Sidebar 6</button>
+    <button onclick="loadContent(7)">Sidebar 7</button>
+  </nav>
+
+  <main>
+    <h1>Dashboard Admin</h1>
+    <div id="content">
+      <p>Silakan pilih menu sidebar.</p>
+    </div>
+  </main>
+  <div id="content"></div>
+
+  <!-- Popup Edit (DILUAR content.innerHTML!) -->
+  <div id="edit-popup" class="popup" style="display:none">
+    <div class="popup-inner">
+      <h3>Edit Data API</h3>
+      <form id="edit-form">
+        <input name="id" type="hidden" />
+        <label>NIM Mahasiswa:</label><br/>
+        <input name="nim_mahasiswa" placeholder="NIM" /><br/>
+        <label>Nama Mahasiswa:</label><br/>
+        <input name="nama_mahasiswa" placeholder="Nama" /><br/>
+        <label>Jenis Kegiatan:</label><br/>
+        <input name="jenis_kegiatan" placeholder="Jenis Kegiatan" /><br/>
+        <label>Nama Kegiatan Lain:</label><br/>
+        <input name="nama_kegiatan_other" placeholder="Kegiatan Other" /><br/>
+        <label>Tanggal Pinjam:</label><br/>
+        <input name="tanggal_pinjam" type="date" /><br/>
+        <label>Jam Mulai:</label><br/>
+        <input name="start_time" type="time" /><br/>
+        <label>Jam Selesai:</label><br/>
+        <input name="end_time" type="time" /><br/>
+        <label>Kode Ruangan:</label><br/>
+        <input name="kode_ruangan" placeholder="Kode Ruangan" /><br/>
+        <label>Nama Ruangan:</label><br/>
+        <input name="nama_ruangan" placeholder="Nama Ruangan" /><br/>
+        <label>Gedung Ruangan:</label><br/>
+        <input name="gedung_ruangan" placeholder="Gedung" /><br/>
+        <label>NIK PJ:</label><br/>
+        <input name="nik_penanggungjawab" placeholder="NIK PJ" /><br/>
+        <label>Nama PJ:</label><br/>
+        <input name="nama_penanggungjawab" placeholder="Nama PJ" /><br/><br/>
+        <button type="submit">Update</button>
+        <button type="button" onclick="closeEdit()">Tutup</button>
+      </form>
+    </div>
+</div>
+
+
+    
+<script>
+function loadContent(number) {
+  const content = document.getElementById('content');
+
+if (number === 1) {
+  const selectedKode = document.getElementById('filterRuangan')?.value || '';
+
+  fetch(`/api/sidebarlaboran1${selectedKode ? '?kode_ruangan=' + encodeURIComponent(selectedKode) : ''}`)
+    .then(res => res.json())
+    .then(data => {
+      window._apiData = data; // simpan cache
+
+      let html = `
+        <button onclick="updateAPI()">Update Data API</button>
+        <h3>Filter Kode Ruangan:</h3>
+        <select id="filterRuangan" onchange="loadContent(1)">
+          <option value="">-- Semua Ruangan --</option>
+        </select>
+
+        <h3>Data Peminjaman:</h3>
+        <table border="1">
+          <tr>
+            <th>ID</th><th>NIM</th><th>Nama</th><th>Jenis Kegiatan</th>
+            <th>Tanggal</th><th>Jam Mulai</th><th>Jam Selesai</th>
+            <th>Kode Ruangan</th><th>Nama Ruangan</th><th>Gedung</th>
+            <th>NIK Penanggung Jawab</th><th>Nama Penanggung Jawab</th>
+            <th>Aksi</th>
+          </tr>
+      `;
+
+      data.forEach(row => {
+  const tanggalLocal = new Date(row.tanggal_pinjam).toISOString().slice(0,10);
+
+  html += `
+    <tr>
+      <td>${row.id}</td>
+      <td>${row.nim_mahasiswa}</td>
+      <td>${row.nama_mahasiswa}</td>
+      <td>${row.jenis_kegiatan} ${row.nama_kegiatan_other || ''}</td>
+      <td>${tanggalLocal}</td>
+      <td>${row.start_time}</td>
+      <td>${row.end_time}</td>
+      <td>${row.kode_ruangan}</td>
+      <td>${row.nama_ruangan}</td>
+      <td>${row.gedung_ruangan}</td>
+      <td>${row.nik_penanggungjawab}</td>
+      <td>${row.nama_penanggungjawab}</td>
+      <td>
+         <button onclick="editAPI(${row.id})">Edit</button>
+         <button onclick="hapusAPI(${row.id})">Hapus</button>
+      </td>
+    </tr>
+  `;
+});
+
+
+      html += '</table>';
+      content.innerHTML = html;
+
+      fetch('/api/sidebarlaboran1/ruangan')
+        .then(res => res.json())
+        .then(ruangan => {
+          const select = document.getElementById('filterRuangan');
+          ruangan.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.kode_ruangan;
+            opt.textContent = `${r.kode_ruangan} - ${r.nama_ruangan}`;
+            if (r.kode_ruangan === selectedKode) opt.selected = true;
+            select.appendChild(opt);
+          });
+        });
+    });
+
+  return;
+}
+
+
+  // Sidebar 2 - 7: Kosongkan dulu
+if (number === 2) {
+  const content = document.getElementById('content');
+  const selectedKode = document.getElementById('filterRuangan2')?.value || '';
+
+  fetch(`/api/admin/sidebar2${selectedKode ? '?kode_ruangan=' + encodeURIComponent(selectedKode) : ''}`)
+    .then(res => res.json())
+    .then(data => {
+      window._jadwalData = data; // simpan global
+      let html = `
+        <button onclick="showTambahForm()">Tambah Jadwal</button>
+        <h3>Filter Kode Ruangan:</h3>
+        <select id="filterRuangan2" onchange="loadContent(2)">
+          <option value="">-- Semua Ruangan --</option>
+        </select>
+
+        <h3>Jadwal Matakuliah</h3>
+        <table border="1">
+          <tr>
+            <th>ID</th><th>Matkul</th><th>Start</th><th>End</th>
+            <th>Kode Ruangan</th><th>Kelas</th><th>Dosen</th><th>Hari</th><th>Aksi</th>
+          </tr>
+      `;
+
+      data.forEach(row => {
+        html += `
+          <tr>
+            <td>${row.id}</td>
+            <td>${row.matkul}</td>
+            <td>${row.start_time}</td>
+            <td>${row.end_time}</td>
+            <td>${row.kode_ruangan}</td>
+            <td>${row.kelas}</td>
+            <td>${row.dosen}</td>
+            <td>${row.hari}</td>
+            <td>
+              <button onclick="showEditForm(${row.id})">Edit</button>
+              <button onclick="hapusJadwal(${row.id})">Hapus</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += '</table>';
+
+      html += `
+<div id="jadwal-popup" class="popup" style="display:none">
+  <div class="popup-inner">
+    <h3 id="form-title">Tambah/Edit Jadwal</h3>
+    <form id="jadwal-form">
+      <input name="id" type="hidden" />
+
+      <label>Matkul:</label><br/>
+      <input name="matkul" required /><br/>
+
+      <label>Jam Mulai:</label><br/>
+      <input name="start_time" type="time" required /><br/>
+
+      <label>Jam Selesai:</label><br/>
+      <input name="end_time" type="time" required /><br/>
+
+        <label>Kode Ruangan:</label><br/>
+        <select name="kode_ruangan" id="kodeRuanganSelect" required>
+        <option value="">-- Pilih Ruangan --</option>
+        </select><br/>
+
+      <label>Kelas:</label><br/>
+      <input name="kelas" required /><br/>
+
+      <label>Dosen:</label><br/>
+      <input name="dosen" required /><br/>
+
+      <label>Hari:</label><br/>
+      <select name="hari" required>
+        <option value="">--Pilih Hari--</option>
+        <option>Senin</option>
+        <option>Selasa</option>
+        <option>Rabu</option>
+        <option>Kamis</option>
+        <option>Jumat</option>
+        <option>Sabtu</option>
+        <option>Minggu</option>
+      </select><br/><br/>
+
+      <button type="submit">Simpan</button>
+      <button type="button" onclick="closeJadwalPopup()">Tutup</button>
+    </form>
+  </div>
+</div>
+`;
+
+      content.innerHTML = html;
+
+    // Setelah render tabel
+    fetch('/api/admin/sidebar2/ruangan')
+    .then(res => res.json())
+    .then(list => {
+        // Filter select (atas tabel)
+        const selectFilter = document.getElementById('filterRuangan2');
+        selectFilter.innerHTML = '<option value="">-- Semua Ruangan --</option>';
+        list.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.kode_ruangan;
+        opt.textContent = `${r.kode_ruangan} | ${r.nama_ruangan}`;
+        if (r.kode_ruangan === selectedKode) opt.selected = true;
+        selectFilter.appendChild(opt);
+        });
+
+        // Form select (popup)
+        const selectForm = document.getElementById('kodeRuanganSelect');
+        selectForm.innerHTML = '<option value="">-- Pilih Ruangan --</option>';
+        list.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.kode_ruangan;
+        opt.textContent = `${r.kode_ruangan} | ${r.nama_ruangan}`;
+        selectForm.appendChild(opt);
+        });
+    });
+
+
+      // Bind submit
+      document.getElementById('jadwal-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(this).entries());
+        const url = data.id ? '/api/admin/sidebar2/edit' : '/api/admin/sidebar2/tambah';
+
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        })
+          .then(res => res.json())
+          .then(d => {
+            alert(d.message);
+            closeJadwalPopup();
+            loadContent(2);
+          });
+      });
+    });
+}else if (number === 3) {
+  const content = document.getElementById('content');
+
+  fetch('/api/admin/sidebar3')
+    .then(res => res.json())
+    .then(data => {
+      let html = `<h3>Ruang Dosen 1 & 2</h3>`;
+
+      html += `
+        <label>Pilih Grup:</label>
+        <select id="filterGrup" onchange="renderAktivitasDosen()">
+          <option value="grup1">Grup 1</option>
+          <option value="grup2">Grup 2</option>
+        </select>
+
+        <button onclick="openTambahPopup()">Tambah Aktivitas</button>
+
+        <div id="tabelDosen"></div>
+
+        <!-- POPUP TAMBAH -->
+        <div id="popup-tambah" class="popup" style="display:none;">
+          <div class="popup-inner">
+            <h4>Tambah Aktivitas Dosen</h4>
+            <form id="formTambahDosen">
+              <label>Nama Dosen:</label><br/>
+              <select name="nama_dosen" required></select><br/>
+
+              <label>Status:</label><br/>
+              <select name="status" required>
+                <option value="Ada">Ada</option>
+                <option value="Tidak Ada">Tidak Ada</option>
+              </select><br/><br/>
+
+              <button type="submit">Simpan</button>
+              <button type="button" onclick="closeTambahPopup()">Tutup</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- POPUP EDIT -->
+        <div id="popup-edit" class="popup" style="display:none;">
+          <div class="popup-inner">
+            <h4>Edit Status Dosen</h4>
+            <form id="formEditDosen">
+              <input type="hidden" name="id">
+              <label>Status:</label><br/>
+              <select name="status" required>
+                <option value="Ada">Ada</option>
+                <option value="Tidak Ada">Tidak Ada</option>
+              </select><br/><br/>
+              <button type="submit">Update</button>
+              <button type="button" onclick="closeEditPopup()">Tutup</button>
+            </form>
+          </div>
+        </div>
+      `;
+
+      content.innerHTML = html;
+
+      window._dosenData = data;
+
+      // Isi opsi nama_dosen di form tambah
+      const namaSelect = document.querySelector('#formTambahDosen select[name="nama_dosen"]');
+      data.grupList.forEach(nama => {
+        const opt = document.createElement('option');
+        opt.value = nama;
+        opt.textContent = nama.charAt(0).toUpperCase() + nama.slice(1);
+        namaSelect.appendChild(opt);
+      });
+
+      // Pasang listener form tambah
+      document.getElementById('formTambahDosen').addEventListener('submit', tambahAktivitasDosen);
+
+      // Pasang listener form edit
+      document.getElementById('formEditDosen').addEventListener('submit', submitEditAktivitasDosen);
+
+      renderAktivitasDosen();
+    })
+    .catch(err => {
+      console.error(err);
+      content.innerHTML = `<p>Gagal load Ruang Dosen 1 & 2</p>`;
+    });
+}
+else if (number === 4) {
+  const content = document.getElementById('content');
+  const selectedKode = document.getElementById('filterRuangan4')?.value || '';
+
+  fetch(`/api/admin/sidebar4${selectedKode ? '?kode_ruangan=' + encodeURIComponent(selectedKode) : ''}`)
+    .then(res => res.json())
+    .then(data => {
+      window._labData = data; // simpan global
+
+      let html = `
+        <button onclick="showTambahLabForm()">Tambah Aktivitas</button>
+        <h3>Filter Kode Ruangan:</h3>
+        <select id="filterRuangan4" onchange="loadContent(4)">
+          <option value="">-- Semua Ruangan --</option>
+        </select>
+
+        <h3>Aktivitas Ruang Lab</h3>
+        <table border="1">
+          <tr>
+            <th>ID</th><th>Nama Laboran</th><th>Datetime</th><th>Status</th><th>Aksi</th>
+          </tr>
+      `;
+
+      data.rows.forEach(row => {
+        html += `
+          <tr>
+            <td>${row.id}</td>
+            <td>${row.nama_laboran}</td>
+            <td>${row.datetime}</td>
+            <td>${row.status}</td>
+            <td>
+              <button onclick="showEditLabForm(${row.id})">Edit</button>
+              <button onclick="hapusLab(${row.id})">Hapus</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += '</table>';
+
+      html += `
+<div id="lab-popup" class="popup" style="display:none">
+  <div class="popup-inner">
+    <h3 id="lab-form-title">Tambah/Edit Aktivitas</h3>
+    <form id="lab-form">
+      <input name="id" type="hidden" />
+
+      <label>Nama Laboran:</label><br/>
+      <select name="nama_laboran" id="labNamaSelect" required>
+        <option value="">-- Pilih Laboran --</option>
+      </select><br/>
+
+      <label>Status:</label><br/>
+      <input name="status" id="labStatusInput" required />
+      <button type="button" onclick="setStatusNormal()">Set Normal</button>
+      <br/><br/>
+
+      <button type="submit">Simpan</button>
+      <button type="button" onclick="closeLabPopup()">Tutup</button>
+    </form>
+  </div>
+</div>
+
+`;
+
+      content.innerHTML = html;
+
+      // Filter ruangan
+      fetch('/api/admin/sidebar4/ruangan')
+        .then(res => res.json())
+        .then(list => {
+          const select = document.getElementById('filterRuangan4');
+          list.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.kode_ruangan;
+            opt.textContent = `${r.kode_ruangan} | ${r.nama_ruangan}`;
+            if (r.kode_ruangan === selectedKode) opt.selected = true;
+            select.appendChild(opt);
+          });
+        });
+
+      // Nama laboran list (untuk opsi select di form)
+      const namaSelect = document.getElementById('labNamaSelect');
+      namaSelect.innerHTML = '<option value="">-- Pilih Laboran --</option>';
+      data.laboranList.forEach(nama => {
+        const opt = document.createElement('option');
+        opt.value = nama;
+        opt.textContent = nama;
+        namaSelect.appendChild(opt);
+      });
+
+      // Submit
+      document.getElementById('lab-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(this).entries());
+        const url = data.id ? '/api/admin/sidebar4/edit' : '/api/admin/sidebar4/tambah';
+
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        })
+          .then(res => res.json())
+          .then(d => {
+            alert(d.message);
+            closeLabPopup();
+            loadContent(4);
+          });
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      content.innerHTML = `<p>Gagal load Sidebar 4</p>`;
+    });
+}else if (number === 5) {
+  const content = document.getElementById('content');
+  const selectedRole = document.getElementById('filterRole')?.value || 'all';
+
+  fetch(`/api/admin/sidebar5?role=${encodeURIComponent(selectedRole)}`)
+    .then(res => res.json())
+    .then(data => {
+      window._usersData = data;
+
+      let html = `
+        <button onclick="showUserForm()">Tambah User</button>
+
+        <h3>Filter Role:</h3>
+        <select id="filterRole" onchange="loadContent(5)">
+          <option value="all">-- Semua --</option>
+          <option value="superadmin">Superadmin</option>
+          <option value="dosen">Dosen</option>
+          <option value="laboran">Laboran</option>
+        </select>
+
+        <h3>Data Users</h3>
+        <table border="1">
+          <tr>
+            <th>ID</th><th>Role</th><th>Nama</th><th>Foto</th><th>Password</th><th>Aksi</th>
+          </tr>
+      `;
+
+      data.forEach(row => {
+        html += `
+          <tr>
+            <td>${row.id}</td>
+            <td>${row.role}</td>
+            <td>${row.nama}</td>
+            <td>${row.foto || '-'}</td>
+            <td>${row.password ? '••••••' : '-'}</td>
+            <td>
+              <button onclick="showUserForm(${row.id})">Edit</button>
+              <button onclick="hapusUser(${row.id})">Hapus</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `</table>`;
+
+      html += `
+<div id="user-popup" class="popup" style="display:none">
+  <div class="popup-inner">
+    <h3 id="user-form-title">Tambah/Edit User</h3>
+    <form id="user-form">
+      <input type="hidden" name="id">
+
+      <label>Role:</label><br/>
+      <select name="role" required>
+        <option value="">-- Pilih Role --</option>
+        <option value="superadmin">Superadmin</option>
+        <option value="dosen">Dosen</option>
+        <option value="laboran">Laboran</option>
+      </select><br/>
+
+      <label>Nama:</label><br/>
+      <input type="text" name="nama" required /><br/>
+
+      <label>Foto (URL):</label><br/>
+      <input type="text" name="foto" /><br/>
+
+      <label>Password:</label><br/>
+      <input type="password" name="password" /><br/><br/>
+
+      <button type="submit">Simpan</button>
+      <button type="button" onclick="closeUserForm()">Tutup</button>
+    </form>
+  </div>
+</div>
+      `;
+
+      content.innerHTML = html;
+      document.getElementById('filterRole').value = selectedRole;
+
+      // Bind form submit
+      document.getElementById('user-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(this).entries());
+        const url = data.id ? '/api/admin/sidebar5/edit' : '/api/admin/sidebar5/tambah';
+
+        fetch(url, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(d => {
+          alert(d.message);
+          closeUserForm();
+          loadContent(5);
+        });
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      content.innerHTML = `<p>Gagal load data Users</p>`;
+    });
+} else if (number === 6) {
+    content.innerHTML = `<p>Konten Sidebar 6 masih kosong.</p>`;
+  } else if (number === 7) {
+    content.innerHTML = `<p>Konten Sidebar 7 masih kosong.</p>`;
+  }
+}
+
+function updateAPI() {
+  if (!confirm('Yakin ambil data API terbaru?')) return;
+
+  fetch('/api/updateapi/updateapi')
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message);
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Gagal update API');
+    });
+}
+
+// Fungsi render ulang tabel
+function renderAktivitasDosen() {
+  const grup = document.getElementById('filterGrup').value;
+  const data = window._dosenData[grup] || [];
+
+  let html = `
+    <table border="1">
+      <tr>
+        <th>ID</th><th>Nama Dosen</th><th>Datetime</th><th>Status</th>
+      </tr>
+  `;
+
+  data.forEach(row => {
+    html += `
+      <tr>
+        <td>${row.id}</td>
+        <td>${row.nama_dosen}</td>
+        <td>${row.datetime}</td>
+        <td>${row.status}</td>
+      </tr>
+    `;
+  });
+
+  html += `</table>`;
+
+  document.getElementById('tabelDosen').innerHTML = html;
+}
+function editAPI(id) {
+  const row = window._apiData.find(r => r.id === id);
+  if (!row) return alert('Data tidak ditemukan');
+
+  const form = document.getElementById('edit-form');
+  form.id.value = row.id;
+  form.nim_mahasiswa.value = row.nim_mahasiswa;
+  form.nama_mahasiswa.value = row.nama_mahasiswa;
+  form.jenis_kegiatan.value = row.jenis_kegiatan;
+  form.nama_kegiatan_other.value = row.nama_kegiatan_other || '';
+  const dt = new Date(row.tanggal_pinjam);
+  form.tanggal_pinjam.value = dt.toLocaleDateString('en-CA');
+
+  form.start_time.value = row.start_time.slice(0,5);
+  form.end_time.value = row.end_time.slice(0,5);
+
+  form.kode_ruangan.value = row.kode_ruangan;
+  form.nama_ruangan.value = row.nama_ruangan;
+  form.gedung_ruangan.value = row.gedung_ruangan;
+  form.nik_penanggungjawab.value = row.nik_penanggungjawab;
+  form.nama_penanggungjawab.value = row.nama_penanggungjawab;
+
+  document.getElementById('edit-popup').style.display = 'flex';
+}
+
+function closeEdit() {
+  document.getElementById('edit-popup').style.display = 'none';
+}
+
+document.getElementById('edit-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(this).entries());
+
+  fetch('/api/updateapi/edit', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(d => {
+    alert(d.message);
+    closeEdit();
+    loadContent(1);
+  });
+});
+
+// fungsi sidebar 2
+function showTambahForm() {
+  const form = document.getElementById('jadwal-form');
+  form.reset();
+  form.id.value = '';
+  document.getElementById('form-title').textContent = 'Tambah Jadwal';
+  document.getElementById('jadwal-popup').style.display = 'flex';
+}
+
+function showEditForm(id) {
+  const row = window._jadwalData.find(r => r.id === id);
+  if (!row) return alert('Data tidak ditemukan');
+  const form = document.getElementById('jadwal-form');
+
+  form.id.value = row.id;
+  form.matkul.value = row.matkul;
+  form.start_time.value = row.start_time.slice(0,5);
+  form.end_time.value = row.end_time.slice(0,5);
+  form.kode_ruangan.value = row.kode_ruangan;
+  form.kelas.value = row.kelas;
+  form.dosen.value = row.dosen;
+  form.hari.value = row.hari;
+
+  document.getElementById('form-title').textContent = 'Edit Jadwal';
+  document.getElementById('jadwal-popup').style.display = 'flex';
+}
+
+function closeJadwalPopup() {
+  document.getElementById('jadwal-popup').style.display = 'none';
+}
+
+function hapusJadwal(id) {
+  if (!confirm('Hapus jadwal ini?')) return;
+  fetch(`/api/admin/sidebar2/hapus/${id}`, { method: 'DELETE' })
+    .then(res => res.json())
+    .then(d => {
+      alert(d.message);
+      loadContent(2);
+    });
+}
+function renderAktivitasDosen() {
+  const grup = document.getElementById('filterGrup').value;
+  const data = window._dosenData[grup];
+
+  let html = `
+    <table border="1">
+      <tr>
+        <th>ID</th><th>Nama Dosen</th><th>Datetime</th><th>Status</th><th>Aksi</th>
+      </tr>
+  `;
+
+  data.forEach(row => {
+    html += `
+      <tr>
+        <td>${row.id}</td>
+        <td>${row.nama_dosen}</td>
+        <td>${row.datetime}</td>
+        <td>${row.status}</td>
+        <td>
+          <button onclick="openEditPopup(${row.id}, '${row.status}')">Edit</button>
+          <button onclick="hapusAktivitasDosen(${row.id})">Hapus</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  html += '</table>';
+  document.getElementById('tabelDosen').innerHTML = html;
+}
+
+function openTambahPopup() {
+  document.getElementById('popup-tambah').style.display = 'flex';
+}
+
+function closeTambahPopup() {
+  document.getElementById('popup-tambah').style.display = 'none';
+}
+
+function tambahAktivitasDosen(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = Object.fromEntries(new FormData(form).entries());
+
+  fetch('/api/admin/sidebar3/tambah', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(d => {
+    alert(d.message);
+    closeTambahPopup();
+    loadContent(3);
+  })
+  .catch(err => {
+    console.error(err);
+    alert('Gagal tambah data');
+  });
+}
+
+function openEditPopup(id, status) {
+  const form = document.getElementById('formEditDosen');
+  form.id.value = id;
+  form.status.value = status;
+  document.getElementById('popup-edit').style.display = 'flex';
+}
+
+function closeEditPopup() {
+  document.getElementById('popup-edit').style.display = 'none';
+}
+
+function submitEditAktivitasDosen(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = Object.fromEntries(new FormData(form).entries());
+
+  fetch('/api/admin/sidebar3/edit', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(d => {
+    alert(d.message);
+    closeEditPopup();
+    loadContent(3);
+  })
+  .catch(err => {
+    console.error(err);
+    alert('Gagal update');
+  });
+}
+
+function hapusAktivitasDosen(id) {
+  if (!confirm('Yakin mau hapus?')) return;
+
+  fetch(`/api/admin/sidebar3/hapus/${id}`, {
+    method: 'DELETE'
+  })
+  .then(res => res.json())
+  .then(d => {
+    alert(d.message);
+    loadContent(3);
+  })
+  .catch(err => {
+    console.error(err);
+    alert('Gagal hapus');
+  });
+}
+// === Fungsi helper ===
+
+function showTambahLabForm() {
+  const popup = document.getElementById('lab-popup');
+  const form = document.getElementById('lab-form');
+  document.getElementById('lab-form-title').innerText = 'Tambah Aktivitas';
+  form.reset();
+  form.id.value = '';
+  popup.style.display = 'flex';
+}
+
+function showEditLabForm(id) {
+  const row = window._labData.rows.find(r => r.id == id);
+  if (!row) return alert('Data tidak ditemukan');
+
+  const popup = document.getElementById('lab-popup');
+  const form = document.getElementById('lab-form');
+  document.getElementById('lab-form-title').innerText = 'Edit Aktivitas';
+  form.id.value = row.id;
+  form.nama_laboran.value = row.nama_laboran; // Disable di edit? Atau biarkan default.
+  form.nama_laboran.disabled = true; // Biar tidak bisa diubah
+  form.status.value = row.status;
+  popup.style.display = 'flex';
+}
+
+function closeLabPopup() {
+  const popup = document.getElementById('lab-popup');
+  const form = document.getElementById('lab-form');
+  form.nama_laboran.disabled = false; // Buka lock lagi kalau habis edit
+  popup.style.display = 'none';
+}
+
+function hapusLab(id) {
+  if (!confirm('Yakin hapus data ini?')) return;
+
+  fetch(`/api/admin/sidebar4/hapus/${id}`, {
+    method: 'DELETE'
+  })
+    .then(res => res.json())
+    .then(d => {
+      alert(d.message);
+      loadContent(4);
+    });
+}
+function setStatusNormal() {
+  document.getElementById('labStatusInput').value = 'Normal';
+}
+function showUserForm(id) {
+  const form = document.getElementById('user-form');
+  const popup = document.getElementById('user-popup');
+  const title = document.getElementById('user-form-title');
+
+  if (id) {
+    const u = window._usersData.find(u => u.id == id);
+    if (!u) return alert('User tidak ditemukan');
+    title.innerText = 'Edit User';
+    form.id.value = u.id;
+    form.role.value = u.role;
+    form.nama.value = u.nama;
+    form.foto.value = u.foto || '';
+    form.password.value = ''; // Kosongkan, biar user isi kalau mau ubah
+  } else {
+    title.innerText = 'Tambah User';
+    form.reset();
+  }
+
+  popup.style.display = 'flex';
+}
+
+function closeUserForm() {
+  document.getElementById('user-popup').style.display = 'none';
+}
+
+function hapusUser(id) {
+  if (!confirm('Yakin hapus user ini?')) return;
+  fetch(`/api/admin/sidebar5/hapus/${id}`, { method: 'DELETE' })
+    .then(res => res.json())
+    .then(d => {
+      alert(d.message);
+      loadContent(5);
+    });
+}
+</script>
+
+
+</body>
+</html>

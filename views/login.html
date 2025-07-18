@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <style>
+  body {
+    background: #f7fafc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #2d3748;
+  }
+
+  h1 {
+    text-align: center;
+    color: #2d3748;
+  }
+
+  form {
+    background: #ffffff;
+    padding: 30px 40px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+  }
+
+  label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+
+  button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    background: #2b6cb0;
+    border: none;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  button:hover {
+    background: #2c5282;
+  }
+
+  #error-msg {
+    margin-top: 10px;
+    text-align: center;
+  }
+</style>
+
+</head>
+<body>
+ 
+  <form action="/login" method="POST">
+    <label>Nama:</label>
+    <input type="text" name="nama" required>
+    <br>
+    <label>Password:</label>
+    <div style="position: relative;">
+    <input type="password" name="password" id="password-input" required style="padding-right: 30px;">
+    <span id="toggle-eye" onclick="togglePassword()" style="position: absolute; right: 5px; top: 5px; cursor: pointer;">👁️</span>
+    </div>
+    <br>
+    <label>Role:</label>
+    <select name="role" required>
+      <option value="superadmin">Superadmin</option>
+      <option value="laboran">Laboran</option>
+      <option value="dosen">Dosen</option>
+    </select>
+    <br>
+    <p id="error-msg" style="color: red;"></p>
+    <br>
+    <button type="submit">Login</button>
+  
+</form>
+
+</body>
+
+<script>
+  function togglePassword() {
+    const pwInput = document.getElementById('password-input');
+    const eye = document.getElementById('toggle-eye');
+    if (pwInput.type === 'password') {
+      pwInput.type = 'text';
+      eye.textContent = '🙈'; // Mata tutup
+    } else {
+      pwInput.type = 'password';
+      eye.textContent = '👁️'; // Mata buka
+    }
+  }
+
+  // Error msg tetap
+  const params = new URLSearchParams(window.location.search);
+  const error = params.get('error');
+  if (error === 'role') document.getElementById('error-msg').innerText = 'Role tidak cocok.';
+  if (error === 'user') document.getElementById('error-msg').innerText = 'User tidak ditemukan.';
+  if (error === 'password') document.getElementById('error-msg').innerText = 'Password salah.';
+</script>
+
+
+</html>
